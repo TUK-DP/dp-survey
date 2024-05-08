@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  dp-question:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - dp_dp
+    container_name: survey
+    ports:
+      - "8000:8080"
+
+networks:
+  dp_dp:
+    external: true
