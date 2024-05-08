@@ -1,13 +1,15 @@
 from typing import List
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
 
 from model import SuccessResponse, ScoreResponse, QuestionResponse, SGDSResultRequest, SimpleResultRequest
 from text_parsing import simple_text_parsing, SGDS_parsing
 
 app = FastAPI()
+
+prefix_router = APIRouter(prefix="/api/survey")
 
 simple_text = '''
 1.( ) 전화번호나 사람이름을 기억하기 힘들다.
@@ -77,12 +79,12 @@ app.add_middleware(
 )
 
 
-@app.get("/simple")
+@prefix_router.get("/simple", tags=["치매 간이 진단"])
 async def 치매_간이_진단() -> SuccessResponse[List[QuestionResponse]]:
     return SuccessResponse(message="OK", data=simple_text_question_list)
 
 
-@app.post("/simple/result")
+@prefix_router.post("/simple/result", tags=["치매 간이 진단"])
 async def 치매_간이_진단_결과_받기(request: SimpleResultRequest) -> SuccessResponse[ScoreResponse]:
     yes_index_list = request.yes_index_list
 
@@ -104,12 +106,12 @@ async def 치매_간이_진단_결과_받기(request: SimpleResultRequest) -> Su
     )
 
 
-@app.get("/SGDS")
+@prefix_router.get("/SGDS", tags=["단축형 노인 우울 척도"])
 async def 단축형_노인_우울_척도() -> SuccessResponse[List[QuestionResponse]]:
     return SuccessResponse(message="OK", data=sgds_question_list)
 
 
-@app.post("/SGDS/result")
+@prefix_router.post("/SGDS/result", tags=["단축형 노인 우울 척도"])
 async def 단축형_노인_우울_척도_결과_받기(request: SGDSResultRequest) -> SuccessResponse[ScoreResponse]:
     yes_index_list = request.yes_index_list
 
@@ -138,8 +140,6 @@ async def 단축형_노인_우울_척도_결과_받기(request: SGDSResultReques
     else:
         result = "우울증"
 
-
-
     return SuccessResponse(
         message="OK",
         data=ScoreResponse(
@@ -148,6 +148,7 @@ async def 단축형_노인_우울_척도_결과_받기(request: SGDSResultReques
         )
     )
 
+app.include_router(prefix_router)
 
 if __name__ == '__main__':
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8080)
