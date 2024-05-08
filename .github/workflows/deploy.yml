@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  hotfix:
+  Deploy:
     # commit message가 [Deploy]로 시작하면 실행
     if: startsWith(github.event.head_commit.message, '[Deploy]')
     runs-on: ubuntu-latest
