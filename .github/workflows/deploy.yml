@@ -1,0 +1,27 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  hotfix:
+    # commit message가 [Deploy]로 시작하면 실행
+    if: startsWith(github.event.head_commit.message, '[Deploy]')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/dp-survey
+            git checkout main 
+            git stash push || true
+            git pull
+            git stash clear || true
+            sudo docker rm -f survey || true
+            sudo docker-compose -f docker-compose-prod.yml up -d --build
